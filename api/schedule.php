@@ -19,7 +19,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
     $postBody = file_get_contents("php://input");
     $postBody = json_decode($postBody);
 
-    DB::query("INSERT INTO schedules (timestampText) VALUE (:timestampText)", [':timestampText' => $postBody->timestamp]);
+    DB::query("INSERT INTO schedules (timestampText, isFavorite) VALUE (:timestampText, :isFavorite)", [
+        ':timestampText' => $postBody->timestamp,
+        ':isFavorite' => $postBody->isFavorite ? $postBody->isFavorite : false
+    ]);
     $id = DB::query("SELECT id from schedules WHERE timestampText=:timestampText;", [':timestampText' => $postBody->timestamp])[0]['id'];
 
     foreach ($postBody->list as $key => $post) {
@@ -58,7 +61,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
             'message' => 'Schedule updated'
         ]);
     }
-} else if($_SERVER['REQUEST_METHOD'] == 'DELETE') {
+} else if ($_SERVER['REQUEST_METHOD'] == 'DELETE') {
     if (isset($_GET['id'])) {
         DB::query("DELETE FROM schedules WHERE id = :id", [':id' => $_GET['id']]);
 
